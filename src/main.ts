@@ -14,7 +14,7 @@ function doGet() {
     try {
       searchResults = fetchSearchResults(config.twitterToken, keyword)
     } catch (err) {
-      console.error(err)
+      throw new Error(err)
     }
 
     // 検索結果が無い

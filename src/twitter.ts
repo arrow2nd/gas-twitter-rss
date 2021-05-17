@@ -50,14 +50,18 @@ function fetchSearchResults(
   const results: searchResult[] = tweets.map((e) => {
     const id = e.id_str
     const screenName = e.user.screen_name
+
     const createdAt = Utilities.formatDate(
       new Date(e.created_at),
       'Asia/Tokyo',
       'E, d MMM YYYY HH:mm:ss Z'
     )
+
+    // 添付画像がなければプロフィール画像
     const imageUrl = e.entities.media
       ? e.entities.media[0].media_url_https
       : e.user.profile_image_url_https.replace('_normal', '_bigger')
+
     const imageExt = imageUrl.match(/\.([A-Za-z]{3,4}$)/)[1]
 
     return {

@@ -1,16 +1,16 @@
 <rss xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
   <channel>
     <title>Twitterを検索するヒヨコ</title>
-    <description><?=items.length?>件のツイートが見つかりました！</description>
+    <description>新着ツイートをお届けします！</description>
     <?=items.forEach((tweet) =>
     { ?>
     <item>
-      <title><?=tweet.text ?></title>
+      <title><?=tweet.title ?></title>
       <link><?=tweet.url ?></link>
       <description><?=tweet.text ?></description>
       <content:encoded>
         <![CDATA[
-        <img src="<?=tweet.imageUrl ?>" />
+        <div><img src="<?=tweet.imageUrl ?>" /></div>
         <p><?=tweet.text ?></P>
         ]]>
       </content:encoded>

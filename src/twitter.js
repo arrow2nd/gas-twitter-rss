@@ -1,34 +1,22 @@
-type searchResult = {
-  id: string
-  userName: string
-  screenName: string
-  title: string
-  text: string
-  date: string
-  url: string
-  imageUrl: string
-  imageExt: string
-}
-
 /**
  * 文字列を省略
  *
- * @param str 文字列
- * @param len 文字列長
+ * @param {string} str 文字列
+ * @param {number} len 文字列長
  * @returns 省略した文字列
  */
-function truncate(str: string, len: number): string {
+function truncate(str, len) {
   return str.length > len ? `${str.substr(0, len)}...` : str
 }
 
 /**
  * ツイート検索
  *
- * @param token ベアラートークン
- * @param keyword キーワード
+ * @param {string} token ベアラートークン
+ * @param {string} keyword キーワード
  * @returns 検索結果オブジェクト
  */
-function searchTweets(token: string, keyword: string): any[] {
+function searchTweets(token, keyword) {
   // RTを除外
   let query = encodeURIComponent(`${keyword} -filter:retweets`)
 
@@ -51,26 +39,20 @@ function searchTweets(token: string, keyword: string): any[] {
 /**
  * 検索結果を取得
  *
- * @param token ベアラートークン
- * @param search 検索情報
+ * @param {string} token ベアラートークン
+ * @param {string} keyword 検索ワード
  * @returns 検索結果
  */
-function fetchSearchResults(
-  token: string,
-  keyword: string
-): searchResult[] | null {
+function fetchSearchResults(token, keyword) {
   const tweets = searchTweets(token, keyword)
 
   // 検索結果が無い
-  if (tweets.length <= 0) {
-    return null
-  }
+  if (tweets.length <= 0) return null
 
-  const results: searchResult[] = tweets.map((e) => {
-    const id: string = e.id_str
-
-    const title: string = `【${keyword}】${truncate(e.full_text, 20)}`
-    const screenName: string = e.user.screen_name
+  const results = tweets.map((e) => {
+    const id = e.id_str
+    const title = `【${keyword}】${truncate(e.full_text, 20)}`
+    const screenName = e.user.screen_name
 
     // 投稿日時のRSS用のフォーマットに直す
     const createdAt = Utilities.formatDate(
@@ -80,7 +62,7 @@ function fetchSearchResults(
     )
 
     // 添付画像がなければプロフィール画像を指定
-    const imageUrl: string = e.entities.media
+    const imageUrl = e.entities.media
       ? e.entities.media[0].media_url_https
       : e.user.profile_image_url_https.replace('_normal', '_bigger')
 
@@ -102,5 +84,3 @@ function fetchSearchResults(
 
   return results
 }
-
-export { searchResult, fetchSearchResults }

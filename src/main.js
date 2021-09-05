@@ -1,15 +1,11 @@
-import { getSearchWords } from './sheets'
-import { searchResult, fetchSearchResults } from './twitter'
-import { createXML } from './createXML'
-
 const config = PropertiesService.getScriptProperties().getProperties()
 
 function doGet() {
   const searchWords = getSearchWords()
-  let items: searchResult[] = []
+  let items = []
 
   for (const keyword of searchWords) {
-    let searchResults: searchResult[] | null
+    let searchResults = []
 
     try {
       searchResults = fetchSearchResults(config.twitterToken, keyword)
@@ -18,17 +14,10 @@ function doGet() {
     }
 
     // 検索結果が無い
-    if (searchResults === null) {
-      console.log(`[ NotFound ] ${keyword}`)
-      continue
-    }
-
-    console.log(`[ Found ] ${keyword}`)
+    if (searchResults === null) continue
 
     items = items.concat(searchResults)
   }
-
-  console.log('[ Success ]')
 
   return createXML(items)
 }

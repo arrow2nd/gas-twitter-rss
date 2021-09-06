@@ -10,51 +10,74 @@ function truncate(str, len) {
 }
 
 /**
- * ツイート検索
+ * ツイートを検索
  *
  * @param {string} token ベアラートークン
- * @param {string} keyword キーワード
- * @returns 検索結果オブジェクト
+ * @param {array} keywords キーワードの配列
+ * @returns 検索結果の配列
  */
-function searchTweets(token, keyword) {
-  // RTを除外
-  let query = encodeURIComponent(`${keyword} -filter:retweets`)
+function fetchSearchResults(token, keywords) {
+  const params = keywords.map((e) => {
+    const query = encodeURIComponent(`${e} -filter:retweets`)
 
-  const params = {
-    headers: {
-      Authorization: `Bearer ${token}`
+    return {
+      url: `https://api.twitter.com/1.1/search/tweets.json?q=${query}&count=10&result_type=recent&tweet_mode=extended`,
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     }
-  }
+  })
 
-  const res = UrlFetchApp.fetch(
-    `https://api.twitter.com/1.1/search/tweets.json?q=${query}&count=10&result_type=recent&tweet_mode=extended`,
-    params
-  )
+  const res = UrlFetchApp.fetchAll(params)
+  const results = res.map((e) => JSON.parse(e.getContentText()).statuses)
 
-  const json = JSON.parse(res.getContentText())
-
-  return json.statuses
+  return new Array().concat(...results)
 }
 
 /**
- * 検索結果を取得
+ * 埋め込み用HTMLを取得
  *
  * @param {string} token ベアラートークン
- * @param {string} keyword 検索ワード
- * @returns 検索結果
+ * @param {array} tweets ツイートの配列
+ * @returns HTML要素の配列
  */
-function fetchSearchResults(token, keyword) {
-  const tweets = searchTweets(token, keyword)
+function fetchOembedHTMLs(token, tweets) {
+  const params = tweets.map((e) => {
+    const url = encodeURIComponent(
+      `https://twitter.com/${e.user.screen_name}/status/${e.id_str}`
+    )
 
-  // 検索結果が無い
-  if (tweets.length <= 0) return null
+    return {
+      url: `https://publish.twitter.com/oembed?url=${url}`,
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  })
 
-  const results = tweets.map((e) => {
+  const res = UrlFetchApp.fetchAll(params)
+  const results = res.map((e) => JSON.parse(e.getContentText()).html)
+
+  return results
+}
+
+/**
+ * テンプレートに埋め込むデータを作成
+ *
+ * @param {array} searchWords 検索ワードの配列
+ * @param {array} oembedHtmls 埋め込み用HTMLの配列
+ * @param {array} searchResults 検索結果の配列
+ * @returns 埋め込み用データ
+ */
+function createOembedItems(searchWords, oembedHtmls, searchResults) {
+  const results = searchResults.map((e, i) => {
     const id = e.id_str
-    const title = `【${keyword}】${truncate(e.full_text, 20)}`
     const screenName = e.user.screen_name
 
-    // 投稿日時のRSS用のフォーマットに直す
+    const title = `【${searchWords[i]}】${truncate(e.full_text, 20)}`
+    const url = `https://twitter.com/${screenName}/status/${id}`
+
+    // 投稿日時をRSS用のフォーマットに直す
     const createdAt = Utilities.formatDate(
       new Date(e.created_at),
       'Asia/Tokyo',
@@ -70,15 +93,16 @@ function fetchSearchResults(token, keyword) {
     const imageExt = imageUrl.match(/\.([A-Za-z]{3,4}$)/)[1]
 
     return {
-      id: id,
+      id,
       userName: e.user.name,
-      screenName: screenName,
-      title: title,
+      screenName,
+      title,
       text: e.full_text,
       date: createdAt,
-      url: `https://twitter.com/${screenName}/status/${id}`,
-      imageUrl: imageUrl,
-      imageExt: imageExt
+      url,
+      imageUrl,
+      imageExt,
+      oembedHTML: oembedHtmls[i]
     }
   })
 

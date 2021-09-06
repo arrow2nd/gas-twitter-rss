@@ -1,23 +1,15 @@
 const config = PropertiesService.getScriptProperties().getProperties()
 
 function doGet() {
-  const searchWords = getSearchWords()
-  let items = []
+  // スプレッドシートから検索ワードを取得
+  const searchWords = getSearchWordsFromSS()
 
-  for (const keyword of searchWords) {
-    let searchResults = []
+  // 検索
+  const results = fetchSearchResults(config.twitterToken, searchWords)
+  const oembedHtmls = fetchOembedHTMLs(config.twitterToken, results)
 
-    try {
-      searchResults = fetchSearchResults(config.twitterToken, keyword)
-    } catch (err) {
-      throw new Error(err)
-    }
-
-    // 検索結果が無い
-    if (searchResults === null) continue
-
-    items = items.concat(searchResults)
-  }
+  // 整形
+  const items = createOembedItems(searchWords, oembedHtmls, results)
 
   return createXML(items)
 }

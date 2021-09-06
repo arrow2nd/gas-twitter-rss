@@ -10,7 +10,10 @@
       <link><?=tweet.url ?></link>
       <description><?=tweet.text ?></description>
       <content:encoded>
-        <![CDATA[<?=tweet.oembedHTML ?>]]>
+        <![CDATA[
+        <div><img src="<?=tweet.imageUrl ?>" /></div>
+        <?=tweet.oembedHTML ?>
+        ]]>
       </content:encoded>
       <enclosure length="0" type="image/<?=tweet.imageExt ?>" url="<?=tweet.imageUrl ?>"/>
       <guid><?=tweet.url ?></guid>

@@ -29,9 +29,18 @@ function fetchSearchResults(token, keywords) {
   })
 
   const res = UrlFetchApp.fetchAll(params)
-  const results = res.map((e) => JSON.parse(e.getContentText()).statuses)
 
-  return new Array().concat(...results)
+  const results = res.map((e, i) => {
+    const statuses = JSON.parse(e.getContentText()).statuses
+
+    return {
+      keyword: keywords[i],
+      oembedHtmls: fetchOembedHTMLs(token, statuses),
+      statuses
+    }
+  })
+
+  return results
 }
 
 /**
@@ -64,47 +73,51 @@ function fetchOembedHTMLs(token, tweets) {
 /**
  * テンプレートに埋め込むデータを作成
  *
- * @param {array} searchWords 検索ワードの配列
- * @param {array} oembedHtmls 埋め込み用HTMLの配列
  * @param {array} searchResults 検索結果の配列
  * @returns 埋め込み用データ
  */
-function createOembedItems(searchWords, oembedHtmls, searchResults) {
-  const results = searchResults.map((e, i) => {
-    const id = e.id_str
-    const screenName = e.user.screen_name
+function createOembedItems(searchResults) {
+  let results = []
 
-    const title = `【${searchWords[i]}】${truncate(e.full_text, 20)}`
-    const url = `https://twitter.com/${screenName}/status/${id}`
+  for (const { keyword, oembedHtmls, statuses } of searchResults) {
+    const tmp = statuses.map((e, i) => {
+      const id = e.id_str
+      const screenName = e.user.screen_name
 
-    // 投稿日時をRSS用のフォーマットに直す
-    const createdAt = Utilities.formatDate(
-      new Date(e.created_at),
-      'Asia/Tokyo',
-      'E, d MMM YYYY HH:mm:ss Z'
-    )
+      const title = `【${keyword}】${truncate(e.full_text, 20)}`
+      const url = `https://twitter.com/${screenName}/status/${id}`
 
-    // 添付画像がなければプロフィール画像を指定
-    const imageUrl = e.entities.media
-      ? e.entities.media[0].media_url_https
-      : e.user.profile_image_url_https.replace('_normal', '_bigger')
+      // 投稿日時をRSS用のフォーマットに直す
+      const createdAt = Utilities.formatDate(
+        new Date(e.created_at),
+        'Asia/Tokyo',
+        'E, d MMM YYYY HH:mm:ss Z'
+      )
 
-    // 画像の拡張子を抽出（3, 4文字を想定）
-    const imageExt = imageUrl.match(/\.([A-Za-z]{3,4}$)/)[1]
+      // 添付画像がなければプロフィール画像を指定
+      const imageUrl = e.entities.media
+        ? e.entities.media[0].media_url_https
+        : e.user.profile_image_url_https.replace('_normal', '_bigger')
 
-    return {
-      id,
-      userName: e.user.name,
-      screenName,
-      title,
-      text: e.full_text,
-      date: createdAt,
-      url,
-      imageUrl,
-      imageExt,
-      oembedHTML: oembedHtmls[i]
-    }
-  })
+      // 画像の拡張子を抽出（3, 4文字を想定）
+      const imageExt = imageUrl.match(/\.([A-Za-z]{3,4}$)/)[1]
 
-  return results
+      return {
+        id,
+        userName: e.user.name,
+        screenName,
+        title,
+        text: e.full_text,
+        date: createdAt,
+        url,
+        imageUrl,
+        imageExt,
+        oembedHTML: oembedHtmls[i]
+      }
+    })
+
+    results.push(tmp)
+  }
+
+  return new Array().concat(...results)
 }

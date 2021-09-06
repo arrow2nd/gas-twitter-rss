@@ -6,10 +6,9 @@ function doGet() {
 
   // 検索
   const results = fetchSearchResults(config.twitterToken, searchWords)
-  const oembedHtmls = fetchOembedHTMLs(config.twitterToken, results)
 
   // 整形
-  const items = createOembedItems(searchWords, oembedHtmls, results)
+  const items = createOembedItems(results)
 
   return createXML(items)
 }

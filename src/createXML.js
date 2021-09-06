@@ -4,7 +4,7 @@
  * @param items 検索結果
  * @returns XML
  */
-function createXML (items)  {
+function createXML(items) {
   const output = HtmlService.createTemplateFromFile('template')
   output.items = items
 

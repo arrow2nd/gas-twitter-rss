@@ -33,6 +33,8 @@ function fetchSearchResults(token, keywords) {
   const results = res.map((e, i) => {
     const statuses = JSON.parse(e.getContentText()).statuses
 
+    console.log(`${keywords[i]} : ${statuses.length}`)
+
     return {
       keyword: keywords[i],
       oembedHtmls: fetchOembedHTMLs(token, statuses),

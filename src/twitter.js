@@ -1,17 +1,15 @@
 /**
  * 文字列を省略
- *
  * @param {string} str 文字列
  * @param {number} len 文字列長
  * @returns 省略した文字列
  */
 function truncate(str, len) {
-  return str.length > len ? `${str.substr(0, len)}...` : str
+  return str.length > len ? `${str.slice(0, len)}...` : str
 }
 
 /**
  * ツイートを検索
- *
  * @param {string} token ベアラートークン
  * @param {array} keywords キーワードの配列
  * @returns 検索結果の配列
@@ -47,7 +45,6 @@ function fetchSearchResults(token, keywords) {
 
 /**
  * 埋め込み用HTMLを取得
- *
  * @param {string} token ベアラートークン
  * @param {array} tweets ツイートの配列
  * @returns HTML要素の配列
@@ -67,14 +64,11 @@ function fetchOembedHTMLs(token, tweets) {
   })
 
   const res = UrlFetchApp.fetchAll(params)
-  const results = res.map((e) => JSON.parse(e.getContentText()).html)
-
-  return results
+  return res.map((e) => JSON.parse(e.getContentText()).html)
 }
 
 /**
  * テンプレートに埋め込むデータを作成
- *
  * @param {array} searchResults 検索結果の配列
  * @returns 埋め込み用データ
  */

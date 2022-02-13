@@ -21,6 +21,7 @@ function updateCache(items) {
 function getCacheXml() {
   const content = cache.get('content')
 
+  // キャッシュが無いなら生成する
   if (content === null) {
     updateCache()
   }

@@ -1,14 +1,17 @@
 const config = PropertiesService.getScriptProperties().getProperties()
 
 function doGet() {
+  return getCacheXml()
+}
+
+function fetch() {
   // スプレッドシートから検索ワードを取得
   const searchWords = getSearchWordsFromSS()
 
-  // 検索
+  // Twitterで検索
   const results = fetchSearchResults(config.twitterToken, searchWords)
 
-  // 整形
+  // キャッシュを更新
   const items = createOembedItems(results)
-
-  return createXML(items)
+  updateCache(items)
 }

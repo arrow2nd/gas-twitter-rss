@@ -5,9 +5,9 @@
   "repository": "git@github.com:arrow2nd/gas-twitter-rss.git",
   "author": "arrow2nd <44780846+arrow2nd@users.noreply.github.com>",
   "license": "MIT",
-  "dependencies": {},
   "devDependencies": {
-    "@google/clasp": "^2.3.1",
-    "prettier": "^2.3.0"
-  }
+    "@google/clasp": "^2.4.1",
+    "prettier": "^2.5.1"
+  },
+  "packageManager": "yarn@3.1.1"
 }

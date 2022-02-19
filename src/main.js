@@ -6,7 +6,7 @@ function doGet() {
 
 function fetch() {
   // スプレッドシートから検索ワードを取得
-  const searchWords = getSearchWordsFromSS()
+  const searchWords = getSearchWords()
 
   // Twitterで検索
   const results = fetchSearchResults(config.twitterToken, searchWords)

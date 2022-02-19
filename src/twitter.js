@@ -1,20 +1,12 @@
 /**
- * 文字列を省略
- * @param {string} str 文字列
- * @param {number} len 文字列長
- * @returns 省略した文字列
- */
-function truncate(str, len) {
-  return str.length > len ? `${str.slice(0, len)}...` : str
-}
-
-/**
  * ツイートを検索
- * @param {string} token ベアラートークン
- * @param {array} keywords キーワードの配列
- * @returns 検索結果の配列
+ * @param {String} token ベアラートークン
+ * @param {Array<String>} keywords キーワードの配列
+ * @returns {Array} 検索結果の配列
  */
 function fetchSearchResults(token, keywords) {
+  const ignoreUserIds = getIgnoreUserIds()
+
   const params = keywords.map((e) => {
     const query = encodeURIComponent(`${e} -filter:retweets`)
 
@@ -29,7 +21,12 @@ function fetchSearchResults(token, keywords) {
   const res = UrlFetchApp.fetchAll(params)
 
   const results = res.map((e, i) => {
-    const statuses = JSON.parse(e.getContentText()).statuses
+    const json = JSON.parse(e.getContentText())
+
+    // 該当ユーザーのツイートを除外
+    const statuses = json.statuses.filter(
+      (e) => !ignoreUserIds.includes(e.user.screen_name)
+    )
 
     console.log(`${keywords[i]} : ${statuses.length}`)
 
@@ -45,9 +42,9 @@ function fetchSearchResults(token, keywords) {
 
 /**
  * 埋め込み用HTMLを取得
- * @param {string} token ベアラートークン
- * @param {array} tweets ツイートの配列
- * @returns HTML要素の配列
+ * @param {String} token ベアラートークン
+ * @param {Array} tweets ツイートの配列
+ * @returns {Array} HTML要素の配列
  */
 function fetchOembedHTMLs(token, tweets) {
   const params = tweets.map((e) => {
@@ -69,8 +66,8 @@ function fetchOembedHTMLs(token, tweets) {
 
 /**
  * テンプレートに埋め込むデータを作成
- * @param {array} searchResults 検索結果の配列
- * @returns 埋め込み用データ
+ * @param {Array} searchResults 検索結果の配列
+ * @returns {Arrays} 埋め込み用データ
  */
 function createOembedItems(searchResults) {
   let results = []

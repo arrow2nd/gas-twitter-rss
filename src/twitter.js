@@ -67,7 +67,7 @@ function fetchOembedHTMLs(token, tweets) {
 /**
  * テンプレートに埋め込むデータを作成
  * @param {Array} searchResults 検索結果の配列
- * @returns {Arrays} 埋め込み用データ
+ * @returns {Array} 埋め込み用データ
  */
 function createOembedItems(searchResults) {
   let results = []

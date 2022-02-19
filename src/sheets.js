@@ -1,6 +1,6 @@
 /**
  * 検索ワードを取得
- * @return {String[]} 検索ワード
+ * @returns {Array<String>} 検索ワード
  */
 function getSearchWords() {
   return getValuesFromSS(1)
@@ -8,7 +8,7 @@ function getSearchWords() {
 
 /**
  * 除外するユーザーIDを取得
- * @return {String[]} ユーザーID
+ * @returns {Array<String>} ユーザーID
  */
 function getIgnoreUserIds() {
   return getValuesFromSS(2)
@@ -17,7 +17,7 @@ function getIgnoreUserIds() {
 /**
  * スプレッドシートから値を取得
  * @param {Number} col 列番号
- * @return {String[]} 範囲内の値
+ * @returns {Array<String>} 範囲内の値
  */
 function getValuesFromSS(col) {
   const ss = SpreadsheetApp.getActiveSheet()

@@ -2,7 +2,7 @@ const cache = CacheService.getScriptCache()
 
 /**
  * キャッシュを更新する
- * @param items 検索結果
+ * @param {Array} items 検索結果
  */
 function updateCache(items) {
   const output = HtmlService.createTemplateFromFile('template')
@@ -16,7 +16,7 @@ function updateCache(items) {
 
 /**
  * キャッシュしたXMLを取得する
- * @returns XML
+ * @return {String} XML
  */
 function getCacheXml() {
   const content = cache.get('content')

@@ -1,11 +1,33 @@
 /**
- * スプレッドシートから検索ワードを取得
- * @return 検索ワード
+ * 検索ワードを取得
+ * @return {String[]} 検索ワード
  */
-function getSearchWordsFromSS() {
-  const ss = SpreadsheetApp.getActiveSheet()
-  const lastRow = ss.getLastRow() - 1
+function getSearchWords() {
+  return getValuesFromSS(1)
+}
 
-  const values = ss.getRange(2, 1, lastRow, 1).getValues()
-  return values.map((e) => e[0])
+/**
+ * 除外するユーザーIDを取得
+ * @return {String[]} ユーザーID
+ */
+function getIgnoreUserIds() {
+  return getValuesFromSS(2)
+}
+
+/**
+ * スプレッドシートから値を取得
+ * @param {Number} col 列番号
+ * @return {String[]} 範囲内の値
+ */
+function getValuesFromSS(col) {
+  const ss = SpreadsheetApp.getActiveSheet()
+
+  const lastRow =
+    ss
+      .getRange(1, col)
+      .getNextDataCell(SpreadsheetApp.Direction.DOWN)
+      .getRow() - 1
+
+  const values = ss.getRange(2, col, lastRow).getValues()
+  return values.flat()
 }

@@ -1,116 +1,103 @@
+const config = PropertiesService.getScriptProperties().getProperties()
+const ignoreUsernames = getIgnoreUsernames()
+const ignoreClients = getIgnoreClients()
+
 /**
  * ツイートを検索
- * @param {String} token ベアラートークン
- * @param {Array<String>} keywords キーワードの配列
+ * @param {Array<String>} keywords 検索ワード
  * @returns {Array} 検索結果の配列
  */
-function fetchSearchResults(token, keywords) {
-  const ignoreUserIds = getIgnoreUserIds()
+function fetchSearchResults(keywords) {
+  const requests = createRequests(keywords)
+  const responses = UrlFetchApp.fetchAll(requests)
 
-  const params = keywords.map((e) => {
-    const query = encodeURIComponent(`${e} -filter:retweets`)
+  const results = responses.map((res, i) => {
+    const json = JSON.parse(res.getContentText())
+    const data = json?.data
+    const users = json?.includes?.users
 
-    return {
-      url: `https://api.twitter.com/1.1/search/tweets.json?q=${query}&count=10&result_type=recent&tweet_mode=extended`,
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+    // 検索結果が無い
+    if (!data || !users) {
+      return null
     }
+
+    return formatTweets(keywords[i], data, users, json?.includes?.media)
   })
 
-  const res = UrlFetchApp.fetchAll(params)
-
-  const results = res.map((e, i) => {
-    const json = JSON.parse(e.getContentText())
-
-    // 該当ユーザーのツイートを除外
-    const statuses = json.statuses.filter(
-      (e) => !ignoreUserIds.includes(e.user.screen_name)
-    )
-
-    console.log(`${keywords[i]} : ${statuses.length}`)
-
-    return {
-      keyword: keywords[i],
-      oembedHtmls: fetchOembedHTMLs(token, statuses),
-      statuses
-    }
-  })
-
-  return results
+  return results.filter(Boolean).flat()
 }
 
 /**
- * 埋め込み用HTMLを取得
- * @param {String} token ベアラートークン
- * @param {Array} tweets ツイートの配列
- * @returns {Array} HTML要素の配列
+ * 検索ワードからリクエストを作成する
+ * @param {Array<String>} keywords 検索ワード
+ * @returns {Array} リクエスト
  */
-function fetchOembedHTMLs(token, tweets) {
-  const params = tweets.map((e) => {
-    const url = encodeURIComponent(
-      `https://twitter.com/${e.user.screen_name}/status/${e.id_str}`
-    )
+function createRequests(keywords) {
+  return keywords.map((keyword) => {
+    const urlParams = createUrlParam({
+      query: encodeURIComponent(`${keyword} -is:retweet -is:reply`),
+      max_results: '10',
+      expansions: 'author_id,attachments.media_keys',
+      'tweet.fields': 'created_at,id,source,text',
+      'user.fields': 'name,username',
+      'media.fields': 'url'
+    })
 
     return {
-      url: `https://publish.twitter.com/oembed?url=${url}`,
+      url: `https://api.twitter.com/2/tweets/search/recent?${urlParams}`,
       headers: {
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${config.twitterToken}`
       }
     }
   })
-
-  const res = UrlFetchApp.fetchAll(params)
-  return res.map((e) => JSON.parse(e.getContentText()).html)
 }
 
 /**
- * テンプレートに埋め込むデータを作成
- * @param {Array} searchResults 検索結果の配列
- * @returns {Array} 埋め込み用データ
+ * ツイートデータをを整形する
+ * @param {String} keyword 検索ワード
+ * @param {Array} data ツイート
+ * @param {Array} users ユーザー情報
+ * @param {Array | undefined} media メディア情報
+ * @returns {Array} 整形後のツイートデータ
  */
-function createOembedItems(searchResults) {
-  let results = []
+function formatTweets(keyword, data, users, media) {
+  const results = data
+    .map((tweet) => {
+      const user = users.find(({ id }) => id === tweet.author_id)
 
-  for (const { keyword, oembedHtmls, statuses } of searchResults) {
-    const tmp = statuses.map((e, i) => {
-      const id = e.id_str
-      const screenName = e.user.screen_name
+      // 除外対象ならnullを返す
+      if (
+        ignoreClients.includes(tweet.source) ||
+        ignoreUsernames.includes(user.username)
+      ) {
+        return null
+      }
 
-      const title = `【${keyword}】${truncate(e.full_text, 20)}`
-      const url = `https://twitter.com/${screenName}/status/${id}`
+      // 添付画像を取得
+      const mediaKey = tweet?.attachments?.media_keys[0]
+      const mediaUrl =
+        mediaKey && media?.find(({ media_key }) => media_key === mediaKey)?.url
 
       // 投稿日時をRSS用のフォーマットに直す
-      const createdAt = Utilities.formatDate(
-        new Date(e.created_at),
+      const date = Utilities.formatDate(
+        new Date(tweet.created_at),
         'Asia/Tokyo',
         'E, d MMM YYYY HH:mm:ss Z'
       )
 
-      // 添付画像がなければプロフィール画像を指定
-      const imageUrl = e.entities.media
-        ? e.entities.media[0].media_url_https
-        : e.user.profile_image_url_https.replace('_normal', '_bigger')
-
-      // 画像の拡張子を抽出（3, 4文字を想定）
-      const imageExt = imageUrl.match(/\.([A-Za-z]{3,4}$)/)[1]
-
       return {
-        id,
-        userName: e.user.name,
-        screenName,
-        title,
-        text: e.full_text,
-        date: createdAt,
-        url,
-        imageUrl,
-        imageExt,
-        oembedHTML: oembedHtmls[i]
+        title: `【${keyword}】${truncate(tweet.text, 20)}`,
+        name: user.name,
+        username: user.username,
+        text: tweet.text,
+        url: `https://twitter.com/${user.username}/status/${tweet.id}`,
+        mediaUrl,
+        date
       }
     })
+    .filter(Boolean)
 
-    results.push(tmp)
-  }
+  console.log(`${keyword} : ${results.length}`)
 
-  return new Array().concat(...results)
+  return results
 }

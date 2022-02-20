@@ -7,3 +7,14 @@
 function truncate(str, len) {
   return str.length > len ? `${str.slice(0, len)}...` : str
 }
+
+/**
+ * URLパラメータを作成
+ * @param {Object} params パラメータ
+ * @return {String} URLパラメータ
+ */
+function createUrlParam(params) {
+  return Object.entries(params)
+    .map(([key, value]) => `${key}=${value}`)
+    .join('&')
+}

@@ -10,8 +10,16 @@ function getSearchWords() {
  * 除外するユーザーIDを取得
  * @returns {Array<String>} ユーザーID
  */
-function getIgnoreUserIds() {
+function getIgnoreUsernames() {
   return getValuesFromSS(2)
+}
+
+/**
+ * 除外するクライアントを取得
+ * @returns {Array<String>} ユーザーID
+ */
+function getIgnoreClients() {
+  return getValuesFromSS(3)
 }
 
 /**

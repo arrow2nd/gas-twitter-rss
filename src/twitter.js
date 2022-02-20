@@ -35,7 +35,7 @@ function fetchSearchResults(keywords) {
 function createRequests(keywords) {
   return keywords.map((keyword) => {
     const urlParams = createUrlParam({
-      query: encodeURIComponent(`${keyword} -is:retweet`),
+      query: encodeURIComponent(`${keyword} -is:retweet -is:reply`),
       max_results: '10',
       expansions: 'author_id,attachments.media_keys',
       'tweet.fields': 'created_at,id,source,text',

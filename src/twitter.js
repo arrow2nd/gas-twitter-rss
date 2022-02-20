@@ -13,15 +13,7 @@ function fetchSearchResults(keywords) {
 
   const results = responses.map((res, i) => {
     const json = JSON.parse(res.getContentText())
-    const data = json?.data
-    const users = json?.includes?.users
-
-    // 検索結果が無い
-    if (!data || !users) {
-      return null
-    }
-
-    return formatTweets(keywords[i], data, users, json?.includes?.media)
+    return createOembedData(keywords[i], json)
   })
 
   return results.filter(Boolean).flat()
@@ -53,14 +45,21 @@ function createRequests(keywords) {
 }
 
 /**
- * ツイートデータをを整形する
+ * 埋め込み用データを作成
  * @param {String} keyword 検索ワード
- * @param {Array} data ツイート
- * @param {Array} users ユーザー情報
- * @param {Array | undefined} media メディア情報
- * @returns {Array} 整形後のツイートデータ
+ * @param {Object} json JSONオブジェクト
+ * @returns {Array | null} 埋め込み用データ
  */
-function formatTweets(keyword, data, users, media) {
+function createOembedData(keyword, json) {
+  const data = json?.data
+  const users = json?.includes?.users
+  const media = json?.includes?.media
+
+  // 検索結果が無い
+  if (!data || !users) {
+    return null
+  }
+
   const results = data
     .map((tweet) => {
       const author = users.find(({ id }) => id === tweet.author_id)
@@ -75,8 +74,9 @@ function formatTweets(keyword, data, users, media) {
 
       // 添付画像を取得
       const mediaKey = tweet?.attachments?.media_keys[0]
-      const mediaUrl =
-        mediaKey && media?.find(({ media_key }) => media_key === mediaKey)?.url
+      const mediaUrl = media?.find(
+        ({ media_key }) => media_key === mediaKey
+      )?.url
 
       // 投稿日時をRSS用のフォーマットに直す
       const date = Utilities.formatDate(

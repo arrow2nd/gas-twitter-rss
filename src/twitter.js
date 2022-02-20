@@ -63,12 +63,12 @@ function createRequests(keywords) {
 function formatTweets(keyword, data, users, media) {
   const results = data
     .map((tweet) => {
-      const user = users.find(({ id }) => id === tweet.author_id)
+      const author = users.find(({ id }) => id === tweet.author_id)
 
       // 除外対象ならnullを返す
       if (
         ignoreClients.includes(tweet.source) ||
-        ignoreUsernames.includes(user.username)
+        ignoreUsernames.includes(author.username)
       ) {
         return null
       }
@@ -87,10 +87,10 @@ function formatTweets(keyword, data, users, media) {
 
       return {
         title: `【${keyword}】${truncate(tweet.text, 20)}`,
-        name: user.name,
-        username: user.username,
+        name: author.name,
+        username: author.username,
         text: tweet.text,
-        url: `https://twitter.com/${user.username}/status/${tweet.id}`,
+        url: `https://twitter.com/${author.username}/status/${tweet.id}`,
         mediaUrl,
         date
       }

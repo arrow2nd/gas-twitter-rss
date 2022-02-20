@@ -11,14 +11,14 @@
       <description><?=tweet.text ?></description>
       <content:encoded>
         <![CDATA[
-        <div><img src="<?=tweet.imageUrl ?>" /></div>
-        <?=tweet.oembedHTML ?>
+        <p><?=tweet.text ?></p>
+        <?if (tweet.mediaUrl) { ?><div><img src="<?=tweet.mediaUrl ?>" /></div><?} ?>
+        <p>— <?=tweet.name ?> (@<?=tweet.username ?>)</p>
         ]]>
       </content:encoded>
-      <enclosure length="0" type="image/<?=tweet.imageExt ?>" url="<?=tweet.imageUrl ?>"/>
       <guid><?=tweet.url ?></guid>
       <pubDate><?=tweet.date ?></pubDate>
-      <dc:creator><?=tweet.userName ?></dc:creator>
+      <dc:creator><?=tweet.name ?></dc:creator>
     </item>
     <?}) ?>
   </channel>

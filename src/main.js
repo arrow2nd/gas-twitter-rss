@@ -1,5 +1,3 @@
-const config = PropertiesService.getScriptProperties().getProperties()
-
 function doGet() {
   return getCacheXml()
 }
@@ -9,9 +7,8 @@ function fetch() {
   const searchWords = getSearchWords()
 
   // Twitterで検索
-  const results = fetchSearchResults(config.twitterToken, searchWords)
+  const results = fetchSearchResults(searchWords)
 
   // キャッシュを更新
-  const items = createOembedItems(results)
-  updateCache(items)
+  updateCache(results)
 }

@@ -30,7 +30,7 @@ function createRequests(keywords) {
       query: encodeURIComponent(`${keyword} -is:retweet -is:reply`),
       max_results: '10',
       expansions: 'author_id,attachments.media_keys',
-      'tweet.fields': 'created_at,id,source,text',
+      'tweet.fields': 'created_at,id,source,text,entities',
       'user.fields': 'name,username',
       'media.fields': 'url'
     })
@@ -73,10 +73,7 @@ function createOembedData(keyword, json) {
       }
 
       // 添付画像を取得
-      const mediaKey = tweet?.attachments?.media_keys[0]
-      const mediaUrl = media?.find(
-        ({ media_key }) => media_key === mediaKey
-      )?.url
+      const mediaUrl = getMediaUrl(tweet, media)
 
       // 投稿日時をRSS用のフォーマットに直す
       const date = Utilities.formatDate(
@@ -100,4 +97,23 @@ function createOembedData(keyword, json) {
   console.log(`${keyword} : ${results.length}`)
 
   return results
+}
+
+/**
+ * 画像URLを取得
+ * @param {Object} tweet ツイートフィールド
+ * @param {Array} media メディアフィールド
+ * @return {String | undefined} 画像URL
+ */
+function getMediaUrl(tweet, media) {
+  const attachments = tweet?.attachments
+
+  // 添付メディアが存在する
+  if (attachments && media) {
+    const mediaKey = attachments.media_keys[0]
+    return media.find(({ media_key }) => media_key === mediaKey)?.url
+  }
+
+  // リンク先のOGP画像を返す
+  return tweet.entities?.urls?.[0].images?.[0].url
 }

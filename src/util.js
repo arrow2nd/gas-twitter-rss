@@ -1,8 +1,8 @@
 /**
  * 文字列を省略
- * @param {String} str 文字列
- * @param {Number} len 文字列長
- * @return {String} 省略した文字列
+ * @param {string} str 文字列
+ * @param {number} len 文字列長
+ * @return {string} 省略した文字列
  */
 function truncate(str, len) {
   return str.length > len ? `${str.slice(0, len)}...` : str
@@ -10,8 +10,8 @@ function truncate(str, len) {
 
 /**
  * URLパラメータを作成
- * @param {Object} params パラメータ
- * @return {String} URLパラメータ
+ * @param {any} params パラメータ
+ * @return {string} URLパラメータ
  */
 function createUrlParam(params) {
   return Object.entries(params)

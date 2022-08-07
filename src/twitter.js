@@ -4,8 +4,8 @@ const ignoreClients = getIgnoreClients()
 
 /**
  * ツイートを検索
- * @param {Array<String>} keywords 検索ワード
- * @returns {Array} 検索結果の配列
+ * @param {string[]} keywords 検索ワード
+ * @returns {any[]} 検索結果の配列
  */
 function fetchSearchResults(keywords) {
   const requests = createRequests(keywords)
@@ -21,8 +21,8 @@ function fetchSearchResults(keywords) {
 
 /**
  * 検索ワードからリクエストを作成する
- * @param {Array<String>} keywords 検索ワード
- * @returns {Array} リクエスト
+ * @param {string[]} keywords 検索ワード
+ * @returns {any[]} リクエスト
  */
 function createRequests(keywords) {
   return keywords.map((keyword) => {
@@ -46,9 +46,9 @@ function createRequests(keywords) {
 
 /**
  * 埋め込み用データを作成
- * @param {String} keyword 検索ワード
- * @param {Object} json JSONオブジェクト
- * @returns {Array | null} 埋め込み用データ
+ * @param {string} keyword 検索ワード
+ * @param {any} json JSONオブジェクト
+ * @returns {any[] | null} 埋め込み用データ
  */
 function createOembedData(keyword, json) {
   const data = json?.data
@@ -101,9 +101,9 @@ function createOembedData(keyword, json) {
 
 /**
  * 画像URLを取得
- * @param {Object} tweet ツイートフィールド
- * @param {Array} media メディアフィールド
- * @return {String | undefined} 画像URL
+ * @param {any} tweet ツイートフィールド
+ * @param {any[]} media メディアフィールド
+ * @return {string | undefined} 画像URL
  */
 function getMediaUrl(tweet, media) {
   const attachments = tweet?.attachments

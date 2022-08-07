@@ -10,8 +10,8 @@ function updateCache(items) {
 
   const content = output.evaluate().getContent()
 
-  // 1時間キャッシュを保持する
-  cache.put('content', content, 60 * 60)
+  // 2時間キャッシュを保持する
+  cache.put('content', content, 120 * 60)
 }
 
 /**
@@ -20,11 +20,6 @@ function updateCache(items) {
  */
 function getCacheXml() {
   const content = cache.get('content')
-
-  // キャッシュが無いなら生成する
-  if (content === null) {
-    updateCache()
-  }
 
   return ContentService.createTextOutput(content).setMimeType(
     ContentService.MimeType.XML

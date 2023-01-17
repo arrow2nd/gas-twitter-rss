@@ -1,6 +1,6 @@
 const config = PropertiesService.getScriptProperties().getProperties()
 const ignoreUsernames = getIgnoreUsernames()
-const ignoreClients = getIgnoreClients()
+const muteWords = getMuteWords()
 
 /**
  * ツイートを検索
@@ -30,7 +30,7 @@ function createRequests(keywords) {
       query: encodeURIComponent(`${keyword} -is:retweet -is:reply`),
       max_results: '10',
       expansions: 'author_id,attachments.media_keys',
-      'tweet.fields': 'created_at,id,source,text,entities',
+      'tweet.fields': 'created_at,id,text,entities',
       'user.fields': 'name,username',
       'media.fields': 'url'
     })
@@ -64,11 +64,15 @@ function createOembedData(keyword, json) {
     .map((tweet) => {
       const author = users.find(({ id }) => id === tweet.author_id)
 
-      // 除外対象ならnullを返す
-      if (
-        ignoreClients.includes(tweet.source) ||
-        ignoreUsernames.includes(author.username)
-      ) {
+      // ワードミュート
+      for (const muteWord of muteWords) {
+        if (tweet.text.includes(muteWord)) {
+          return null
+        }
+      }
+
+      // ユーザミュート
+      if (ignoreUsernames.includes(author.username)) {
         return null
       }
 

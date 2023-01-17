@@ -8,17 +8,17 @@ function getSearchWords() {
 
 /**
  * 除外するユーザーIDを取得
- * @returns {string[] ユーザーID
+ * @returns {string[]} ユーザーID
  */
 function getIgnoreUsernames() {
   return getValuesFromSS(2)
 }
 
 /**
- * 除外するクライアントを取得
- * @returns {string[]} ユーザーID
+ * ミュートワードを取得
+ * @returns {string[]} ワードリスト
  */
-function getIgnoreClients() {
+function getMuteWords() {
   return getValuesFromSS(3)
 }
 

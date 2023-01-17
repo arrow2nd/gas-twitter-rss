@@ -64,6 +64,11 @@ function createOembedData(keyword, json) {
     .map((tweet) => {
       const author = users.find(({ id }) => id === tweet.author_id)
 
+      // リツイートなら除外
+      if (tweet.text.startsWith('RT')) {
+        return null
+      }
+
       // ワードミュート
       for (const muteWord of muteWords) {
         if (tweet.text.includes(muteWord)) {
